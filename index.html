@@ -1,0 +1,166 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>AI MUSIC WEB APP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.js"></script>
+  <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/addons/p5.sound.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/addons/p5.sound.min.js"></script>
+ 
+</head>
+<body background="background.jpg">
+<center>
+  	<h3 class="btn btn-warning heading">AI MUSIC WEB APP
+	    <br>
+	    <span class="note">NOTE - Get your left-hand wrist in front of the webcam to play Tanhaji. 
+			Get your right-hand wrist in front of the webcam to play Indian Army Song</span>
+  	</h3>
+
+	<br><br>
+  <h3 class="btn btn-danger" id="song">Song Name</h3>
+  <script>
+    song1 = "";
+song2 = "";
+
+song1_status = "";
+song2_status = "";
+
+scoreRightWrist = 0;
+scoreLeftWrist = 0;
+
+rightWristX = 0;
+rightWristY = 0;
+
+leftWristX = 0;
+leftWristY = 0;
+
+function preload()
+{
+	song1 = loadSound("song1.mp4");
+	song2 = loadSound("videoplayback.mp4");
+}
+
+function setup() {
+	canvas =  createCanvas(600, 500);
+	canvas.center();
+
+	video = createCapture(VIDEO);
+  video.hide();
+
+	poseNet = ml5.poseNet(video, modelLoaded);
+	poseNet.on('pose', gotPoses);
+}
+
+function modelLoaded() {
+  console.log('PoseNet Is Initialized');
+}
+
+function gotPoses(results)
+{
+  if(results.length > 0)
+  {
+	console.log(results);
+	scoreRightWrist =  results[0].pose.keypoints[10].score;
+	scoreLeftWrist =  results[0].pose.keypoints[9].score;
+	console.log("scoreRightWrist = " + scoreRightWrist + "scoreLeftWrist = " + scoreLeftWrist);
+	
+	rightWristX = results[0].pose.rightWrist.x;
+	rightWristY = results[0].pose.rightWrist.y;
+	console.log("rightWristX = " + rightWristX +" rightWristY = "+ rightWristY);
+
+	leftWristX = results[0].pose.leftWrist.x;
+	leftWristY = results[0].pose.leftWrist.y;
+	console.log("leftWristX = " + leftWristX +" leftWristY = "+ leftWristY);
+		
+  }
+}
+
+function draw() {
+	image(video, 0, 0, 600, 500);
+	
+	song1_status = song1.isPlaying();
+	song2_status = song2.isPlaying();
+
+	fill("#FF0000");
+	stroke("#FF0000");
+
+	if(scoreRightWrist > 0.2)
+	{ 
+		circle(rightWristX,rightWristY,20);
+
+			song2.stop();
+
+		if(song1_status == false)
+		{
+			song1.play();
+			document.getElementById("song").innerHTML = "Playing - Indian Army"
+		}
+	}
+
+	if(scoreLeftWrist > 0.2)
+	{
+		circle(leftWristX,leftWristY,20);
+
+			song1.stop();
+
+		if(song2_status == false)
+		{
+			song2.play();
+			document.getElementById("song").innerHTML = "Playing - Tanhaji"
+		}
+	}
+
+}
+    </script>
+    <style>
+      .div_speed{
+    float: left;
+}
+.div_speed_img{
+    width:200px;
+    border-radius: 100px;
+}
+#speed{
+    font-size:23px;
+    margin:15px;
+}
+.div_volume{
+    float:right;
+}
+.div_volume_img{
+    width: 200px;
+    border-radius:100px;
+}
+#volume{
+    font-size:23px;
+    margin:15px;
+}
+.play_button{
+    width: 130px;
+    font-size:25px;
+}
+.stop_button{
+    width: 130px;
+    font-size:25px;
+}
+canvas{
+    border:5px solid white;
+    border-radius: 20px;
+}
+    </style>
+</center>
+
+<script src="main.js"></script>
+</body>
+</html>
